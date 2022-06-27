@@ -1,0 +1,69 @@
+import numpy as np
+import pandas as pd 
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn import metrics 
+
+#loading csv file to pandas data frame 
+gold_data = pd.read_csv('/content/gld_price_data.csv')
+
+# print 5 rows in data Frame
+gold_data.head()
+
+#print the last 5 rows of the DataFrame
+gold_data.tail()
+
+#number of rows and colums
+gold_data.shape
+
+#geeting some basic information about the data
+gold_data.info()
+
+#checking the number of missing values
+gold_data.isnull().sum()
+
+#getting the statistical measures of the data
+gold_data.describe()
+
+correlation=gold_data.corr()
+
+#constructing a heatmap to understand the correlation
+plt.figure(figsize=(8,8))
+sns.heatmap(correlation,cbar=True,square=True,fmt='.1f',annot=True,annot_kws={'size':8},cmap='Blues')
+
+print(correlation['GLD'])
+
+#checking the distribution of the gold price 
+sns.distplot(gold_data['GLD'],color='green')
+
+X=gold_data.drop(['Date','GLD'],axis=1)
+Y=gold_data['GLD']
+
+print(Y)
+
+X_train,X_test,Y_train,Y_test=train_test_split(X,Y,test_size=0.2,random_state=2)
+
+regressor=RandomForestRegressor(n_estimators=100)
+
+#training the model 
+regressor.fit(X_train,Y_train)
+
+#prediction on test data
+test_data_prediction=regressor.predict(X_test)
+print(test_data_prediction)
+#R squared error
+error_source = metrics.r2_score(Y_test,test_data_prediction)
+print('R squared error: ',error_source)
+
+Y_test=list(Y_test)
+
+plt.plot(Y_test,color='blue',label='Actual Value')
+plt.plot(test_data_prediction,color='green',label='Predicted Value')
+plt.title('Actual Price vs Expected Value')
+plt.xlabel('Number of Values')
+plt.ylabel('GLD Price')
+plt.legend()
+plt.show()
+
